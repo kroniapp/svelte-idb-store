@@ -1,4 +1,5 @@
 <button on:click={() => ($lists = people)}>UPDATE</button>
+<button on:click={() => lists.clear()}>CLEAR</button>
 
 {#if $lists}
   {#each $lists as person}
@@ -12,7 +13,9 @@
 <script lang="ts">
   import idbStore from "$lib";
 
-  const lists = idbStore<any[]>("lists", "_id", []);
+  const lists = idbStore<any[]>("lists", [], {
+    index: "_id"
+  });
 
   const people = [
     {

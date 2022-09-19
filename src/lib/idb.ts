@@ -2,7 +2,7 @@ export default class IDB {
   db!: IDBDatabase;
   name: string;
 
-  constructor(name: string, key: string, callback: (val: any[]) => void) {
+  constructor(name: string, index: string | undefined, callback: (val: any[]) => void) {
     this.name = name;
 
     const conn = window.indexedDB.open("data", 1);
@@ -16,9 +16,9 @@ export default class IDB {
     conn.onupgradeneeded = event => {
       this.db = conn.result;
 
-      this.db.createObjectStore(this.name, {keyPath: key});
+      this.db.createObjectStore(this.name, index ? {keyPath: index} : undefined);
 
-      if(conn.transaction) conn.transaction.oncomplete = () => this.get(callback);
+      if (conn.transaction) conn.transaction.oncomplete = () => this.get(callback);
     };
   }
 
@@ -39,8 +39,19 @@ export default class IDB {
     return data.put(val);
   }
 
+  setAll(val: any[]) {
+    val.forEach(e => this.set(e));
+  }
+
   remove(id: any) {
     const data = this.createTransaction();
     return data.delete(id);
+  }
+
+  removeAll(callback?: () => void) {
+    const data = this.createTransaction();
+    const val = data.clear();
+
+    val.onsuccess = () => callback && callback();
   }
 }
