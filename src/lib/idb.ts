@@ -1,57 +1,45 @@
+import {openDB, type IDBPDatabase} from "idb";
+
 export default class IDB {
-  db!: IDBDatabase;
+  db!: IDBPDatabase;
   name: string;
+  index: string;
 
-  constructor(name: string, index: string | undefined, callback: (val: any[]) => void) {
+  constructor(name: string) {
     this.name = name;
-
-    const conn = window.indexedDB.open("data", 1);
-
-    conn.onsuccess = () => {
-      this.db = conn.result;
-
-      this.get(callback);
-    };
-
-    conn.onupgradeneeded = event => {
-      this.db = conn.result;
-
-      this.db.createObjectStore(this.name, index ? {keyPath: index} : undefined);
-
-      if (conn.transaction) conn.transaction.oncomplete = () => this.get(callback);
-    };
+    this.index = "value";
   }
 
-  private createTransaction() {
-    const transaction = this.db.transaction(this.name, "readwrite");
-
-    return transaction.objectStore(this.name);
+  isBrowser() {
+    return typeof window !== "undefined" && "indexedDB" in window;
   }
 
-  get(callback: (val: any[]) => void) {
-    const data = this.createTransaction();
-    const val = data.getAll();
-    val.onsuccess = () => callback(val.result);
+  async initialize() {
+    if (this.isBrowser()) {
+      try {
+        this.db = await openDB("data", undefined, {
+          upgrade: db => !db.objectStoreNames.contains(this.name) && db.createObjectStore(this.name)
+        });
+
+        return await this.get();
+      } catch (err) {
+        console.log(err);
+      }
+    }
   }
 
-  set(val: any) {
-    const data = this.createTransaction();
-    return data.put(val);
+  async get() {
+    if (!this.isBrowser()) return;
+    return await this.db.get(this.name, this.index);
   }
 
-  setAll(val: any[]) {
-    val.forEach(e => this.set(e));
+  async set(val: any) {
+    if (!this.isBrowser()) return;
+    return await this.db.put(this.name, val, this.index);
   }
 
-  remove(id: any) {
-    const data = this.createTransaction();
-    return data.delete(id);
-  }
-
-  removeAll(callback?: () => void) {
-    const data = this.createTransaction();
-    const val = data.clear();
-
-    val.onsuccess = () => callback && callback();
+  async remove() {
+    if (!this.isBrowser()) return;
+    return await this.db.delete(this.name, this.index);
   }
 }
