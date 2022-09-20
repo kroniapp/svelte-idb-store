@@ -13,22 +13,23 @@
 <script lang="ts">
   import idbStore from "$lib";
 
-  const lists = idbStore<any[]>("lists", [], {
-    index: "_id"
-  });
+  const lists = idbStore<any[]>("lists", []);
 
   const people = [
     {
       _id: "a",
-      name: "Test1"
+      name: "Test3",
+      order: 2
     },
     {
       _id: "b",
-      name: "Test2"
+      name: "Test2",
+      order: 1
     },
     {
       _id: "c",
-      name: "Test3"
+      name: "Test1",
+      order: 0
     }
   ];
 </script>
