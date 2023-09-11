@@ -1,0 +1,96 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - v[0-9]+\.[0-9]+\.[0-9]+
+      - v[0-9]+\.[0-9]+\.[0-9]+-next\.[0-9]+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - name: Configure Git
+        run: |
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --get user.name
+          git config --get user.email
+
+      - name: Set up checkout
+        uses: actions/checkout@v3
+
+      - name: Set up PNPM
+        uses: pnpm/action-setup@v2
+        with:
+          version: 7
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+          registry-url: "https://registry.npmjs.org"
+          cache: "pnpm"
+
+      - name: Set up env
+        run: |
+          tag=$GITHUB_REF_NAME
+          version=$(echo $tag | sed -r "s/^v(.*)$/\1/")
+          prerelease=false
+
+          if [[ $tag == *"-next"* ]]; then
+            prerelease=true
+          fi
+
+          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+          message=$(git tag -l --format='%(contents:subject)' ${GITHUB_REF#refs/tags/})
+          
+          if [[ $prerelease == "true" ]]; then
+            branch=develop
+            npm_tag=next
+          else
+            branch=master
+            npm_tag=latest
+          fi
+
+          echo "prerelease=$prerelease" >> $GITHUB_ENV
+          echo "version=$version" >> $GITHUB_ENV
+          echo "message=$message" >> $GITHUB_ENV
+          echo "branch=$branch" >> $GITHUB_ENV
+          echo "npm_tag=$npm_tag" >> $GITHUB_ENV
+
+          echo "Prerelease: $prerelease"
+          echo "Version: $version"
+          echo "Message: $message"
+          echo "Branch: $branch"
+          echo "NPM tag: $npm_tag"
+
+      - name: Update version
+        run: |
+          git fetch --all
+          git checkout ${{env.branch}}
+          git pull origin ${{env.branch}}
+          pnpm version ${{env.version}} --no-git-tag-version --allow-same-version
+          git commit -am "Bump version ${{env.version}}" --allow-empty
+          git push origin ${{env.branch}}
+
+      - name: Build
+        run: |
+          pnpm i
+          pnpm run build
+
+      - name: Publish
+        run: pnpm publish --tag ${{env.npm_tag}} --no-git-checks
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{env.version}}
+          name: v${{env.version}}
+          prerelease: ${{env.prerelease}}
+          body: ${{env.message}}

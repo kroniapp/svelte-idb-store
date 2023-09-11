@@ -1,7 +1,7 @@
 {
 	"name": "svelte-idb-store",
 	"version": "0.1.0b",
-	"description": "A library that allows you to sync the value of your stores with IndexedDB",
+	"description": "A library that allows you to sync the value of your Svelte stores with IndexedDB",
 	"keywords": [
 		"svelte",
 		"svelte-store",
@@ -21,28 +21,34 @@
 		"type": "git",
 		"url": "https://github.com/kroniapp/svelte-idb-store"
 	},
-	"main": "./index.js",
-	"types": "./index.d.ts",
-	"svelte": "./index.js",
+	"main": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"svelte": "./dist/index.js",
+	"type": "module",
+	"browser": true,
 	"scripts": {
 		"start": "vite dev",
 		"build": "svelte-package"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^1.0.0-next.29",
-		"@sveltejs/kit": "^1.0.0-next.484",
-		"@sveltejs/package": "^1.0.0-next.1",
+		"@sveltejs/adapter-static": "^2.0.2",
+		"@sveltejs/kit": "^1.22.3",
+		"@sveltejs/package": "^2.2.0",
 		"micromatch": "^4.0.5",
-		"prettier": "^2.7.1",
-		"prettier-plugin-svelte": "^2.7.0",
-		"svelte": "^3.50.1",
-		"svelte-preprocess": "^4.10.7",
-		"typescript": "^4.8.3",
-		"vite": "^3.1.2"
+		"prettier": "^3.0.0",
+		"prettier-plugin-svelte": "^3.0.0",
+		"svelte": "^4.1.1",
+		"svelte-preprocess": "^5.0.4",
+		"typescript": "^5.1.6",
+		"vite": "^4.4.6"
 	},
 	"dependencies": {
-		"idb": "^7.0.2"
+		"idb": "^7.1.1"
 	},
-	"type": "module",
-	"browser": true
+	"files": [
+		"dist"
+	],
+	"exports": {
+		".": "./dist/index.js"
+	}
 }
