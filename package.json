@@ -1,6 +1,6 @@
 {
 	"name": "svelte-idb-store",
-	"version": "0.1.0b",
+	"version": "0.2.0",
 	"description": "A library that allows you to sync the value of your Svelte stores with IndexedDB",
 	"keywords": [
 		"svelte",
@@ -31,16 +31,16 @@
 		"build": "svelte-package"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^2.0.2",
-		"@sveltejs/kit": "^1.22.3",
-		"@sveltejs/package": "^2.2.0",
+		"@sveltejs/adapter-static": "^2.0.3",
+		"@sveltejs/kit": "^1.27.5",
+		"@sveltejs/package": "^2.2.2",
 		"micromatch": "^4.0.5",
-		"prettier": "^3.0.0",
-		"prettier-plugin-svelte": "^3.0.0",
-		"svelte": "^4.1.1",
-		"svelte-preprocess": "^5.0.4",
-		"typescript": "^5.1.6",
-		"vite": "^4.4.6"
+		"prettier": "^3.1.0",
+		"prettier-plugin-svelte": "^3.1.0",
+		"svelte": "^4.2.3",
+		"svelte-preprocess": "^5.1.0",
+		"typescript": "^5.2.2",
+		"vite": "5.0.0-beta.18"
 	},
 	"dependencies": {
 		"idb": "^7.1.1"
