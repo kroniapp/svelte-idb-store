@@ -35,7 +35,7 @@ export default class IDB {
 
   async set(val: any) {
     if (!this.isBrowser()) return;
-    return await this.db.put(this.name, val, this.index);
+    return await this.db.put(this.name, JSON.parse(JSON.stringify(val)), this.index);
   }
 
   async remove() {

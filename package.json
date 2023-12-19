@@ -1,6 +1,6 @@
 {
 	"name": "svelte-idb-store",
-	"version": "0.1.0b",
+	"version": "0.1.1",
 	"description": "A library that allows you to sync the value of your stores with IndexedDB",
 	"keywords": [
 		"svelte",
