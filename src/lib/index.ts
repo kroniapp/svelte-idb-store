@@ -6,15 +6,17 @@ interface IDBStoreArrayV4<T> extends Writable<T[]>, IDBStoreArray<T> {}
 
 interface IDBStoreObjectV4<T extends Record<string, any>> extends Writable<T>, IDBStoreObject<T> {}
 
-export const idbStoreArray = <T extends Record<string, any>>({name, key, initialValue = [], callback}: OptionsArray<T>): IDBStoreArrayV4<T> => {
+export const idbStoreArray = <T extends Record<string, any>>({name, key, initialValue = [], onLoad, onCreate}: OptionsArray<T>): IDBStoreArrayV4<T> => {
   const s = writable<T[]>(initialValue);
 
   const idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
     s.set(await idb.get());
 
-    if (creating && callback) {
-      callback();
+    if (creating && onCreate) {
+      onCreate();
     }
+
+    onLoad && onLoad();
   });
 
   return {
@@ -35,15 +37,17 @@ export const idbStoreArray = <T extends Record<string, any>>({name, key, initial
   };
 };
 
-export const idbStoreObject = <T extends Record<string, any>>({name, initialValue, callback}: OptionsObject<T>): IDBStoreObjectV4<T> => {
+export const idbStoreObject = <T extends Record<string, any>>({name, initialValue, onLoad, onCreate}: OptionsObject<T>): IDBStoreObjectV4<T> => {
   const s = writable<T>(initialValue);
 
   const idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
     s.set(await idb.get());
 
-    if (creating && callback) {
-      callback();
+    if (creating && onCreate) {
+      onCreate();
     }
+
+    onLoad && onLoad();
   });
 
   return {

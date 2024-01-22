@@ -9,15 +9,17 @@ interface IDBStoreObjectV5<T extends Record<string, any>> extends IDBStoreObject
   value: T;
 }
 
-export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initialValue = [], callback}: OptionsArray<T>): IDBStoreArrayV5<T> => {
+export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initialValue = [], onLoad, onCreate}: OptionsArray<T>): IDBStoreArrayV5<T> => {
   let s: T[] = $state(initialValue);
 
   let idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
     s = await idb.get();
 
-    if (creating && callback) {
-      callback();
+    if (creating && onCreate) {
+      onCreate();
     }
+
+    onLoad && onLoad();
   });
 
   return {
@@ -40,13 +42,15 @@ export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initi
   };
 };
 
-export const idbStoreObjectV5 = <T extends Record<string, any>>({name, initialValue, callback}: OptionsObject<T>): IDBStoreObjectV5<T> => {
+export const idbStoreObjectV5 = <T extends Record<string, any>>({name, initialValue, onLoad, onCreate}: OptionsObject<T>): IDBStoreObjectV5<T> => {
   let idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
     s = await idb.get();
 
-    if (creating && callback) {
-      callback();
+    if (creating && onCreate) {
+      onCreate();
     }
+
+    onLoad && onLoad();
   });
 
   let s: T | undefined = $state(initialValue);
