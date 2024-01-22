@@ -12,7 +12,7 @@ interface IDBStoreObjectV5<T extends Record<string, any>> extends IDBStoreObject
 export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initialValue = [], onLoad, onCreate}: OptionsArray<T>): IDBStoreArrayV5<T> => {
   let s: T[] = $state(initialValue);
 
-  let idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
+  const idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
     s = await idb.get();
 
     if (creating && onCreate) {
@@ -43,7 +43,7 @@ export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initi
 };
 
 export const idbStoreObjectV5 = <T extends Record<string, any>>({name, initialValue, onLoad, onCreate}: OptionsObject<T>): IDBStoreObjectV5<T> => {
-  let idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
+  const idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
     s = await idb.get();
 
     if (creating && onCreate) {

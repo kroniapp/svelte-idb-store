@@ -10,7 +10,7 @@ export interface IDBStoreArray<T> extends IDBStore {
 
 export interface IDBStoreObject<T extends Record<string, any>> extends IDBStore {
   getItem: <K extends Extract<keyof T, string>>(id: K) => Promise<T[K]>;
-  setItem: <K extends Extract<keyof T, string>>(id: K, val: T[K]) => void;
+  setItem: <K extends Extract<keyof T, string>>(id: K, val: T[K]) => Promise<void>;
   removeItem: <K extends Extract<keyof T, string>>(id: K) => Promise<void>;
 }
 
