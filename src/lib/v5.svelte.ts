@@ -14,7 +14,10 @@ export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initi
 
   let idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
     s = await idb.get();
-    callback && callback(creating);
+
+    if (creating && callback) {
+      callback();
+    }
   });
 
   return {
@@ -40,7 +43,10 @@ export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initi
 export const idbStoreObjectV5 = <T extends Record<string, any>>({name, initialValue, callback}: OptionsObject<T>): IDBStoreObjectV5<T> => {
   let idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
     s = await idb.get();
-    callback && callback(creating);
+
+    if (creating && callback) {
+      callback();
+    }
   });
 
   let s: T | undefined = $state(initialValue);

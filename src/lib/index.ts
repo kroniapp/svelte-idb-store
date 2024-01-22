@@ -11,7 +11,10 @@ export const idbStoreArray = <T extends Record<string, any>>({name, key, initial
 
   const idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
     s.set(await idb.get());
-    callback && callback(creating);
+
+    if (creating && callback) {
+      callback();
+    }
   });
 
   return {
@@ -37,7 +40,10 @@ export const idbStoreObject = <T extends Record<string, any>>({name, initialValu
 
   const idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
     s.set(await idb.get());
-    callback && callback(creating);
+
+    if (creating && callback) {
+      callback();
+    }
   });
 
   return {

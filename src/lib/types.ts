@@ -18,11 +18,11 @@ export interface OptionsArray<T> {
   name: string;
   key: Extract<keyof T, string>;
   initialValue?: T[];
-  callback?: (creating: boolean) => void;
+  callback?: () => void;
 }
 
 export interface OptionsObject<T> {
   name: string;
   initialValue?: T;
-  callback?: (creating: boolean) => void;
+  callback?: () => void;
 }
