@@ -59,23 +59,19 @@ jobs:
           message=$(git tag -l --format='%(contents:subject)' ${GITHUB_REF#refs/tags/})
 
           if [[ $prerelease == "true" ]]; then
-            branch=develop
             npm_tag=next
           else
-            branch=master
             npm_tag=latest
           fi
 
           echo "prerelease=$prerelease" >> $GITHUB_ENV
           echo "version=$version" >> $GITHUB_ENV
           echo "message=$message" >> $GITHUB_ENV
-          echo "branch=$branch" >> $GITHUB_ENV
           echo "npm_tag=$npm_tag" >> $GITHUB_ENV
 
           echo "Prerelease: $prerelease"
           echo "Version: $version"
           echo "Message: $message"
-          echo "Branch: $branch"
           echo "NPM tag: $npm_tag"
 
       - name: Install
