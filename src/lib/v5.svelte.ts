@@ -1,4 +1,4 @@
-import {IDBArray, IDBObject, remove} from "./idb";
+import {IDBArray, IDBObject, exists, remove} from "./idb";
 import type {IDBStoreArray, IDBStoreObject, OptionsArray, OptionsObject} from "./types";
 
 interface IDBStoreArrayV5<T> extends IDBStoreArray<T> {
@@ -64,5 +64,7 @@ export const idbStoreObjectV5 = <T extends Record<string, any>>({name, initialVa
     }
   };
 };
+
+export const existsDB = exists;
 
 export const deleteDB = remove;

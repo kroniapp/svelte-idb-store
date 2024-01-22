@@ -124,4 +124,6 @@ export class IDBObject<T extends Record<string, any>> extends IDB<T, Extract<key
   };
 }
 
+export const exists = async (name: string): Promise<boolean> => (await indexedDB.databases()).some(db => db.name === name);
+
 export const remove = deleteDB;

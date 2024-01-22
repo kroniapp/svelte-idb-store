@@ -1,5 +1,5 @@
 import {writable, type Writable} from "svelte/store";
-import {IDBArray, IDBObject, remove} from "./idb";
+import {exists, IDBArray, IDBObject, remove} from "./idb";
 import type {IDBStoreArray, IDBStoreObject, OptionsArray, OptionsObject} from "./types";
 
 interface IDBStoreArrayV4<T> extends Writable<T[]>, IDBStoreArray<T> {}
@@ -57,5 +57,7 @@ export const idbStoreObject = <T extends Record<string, any>>({name, initialValu
     }
   };
 };
+
+export const existsDB = exists;
 
 export const deleteDB = remove;
