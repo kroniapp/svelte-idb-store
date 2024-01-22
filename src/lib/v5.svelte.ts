@@ -1,4 +1,5 @@
 import {IDBArray, IDBObject, remove} from "./idb";
+import type {IDBStoreArray, IDBStoreObject, OptionsArray, OptionsObject} from "./types";
 
 interface IDBStoreArrayV5<T> extends IDBStoreArray<T> {
   value: T[];
