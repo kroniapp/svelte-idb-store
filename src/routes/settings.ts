@@ -2,10 +2,10 @@ import {idbStoreObject} from "$lib";
 
 export type Settings = {
   theme: "light" | "dark" | null;
-  animations: boolean;
+  animations?: boolean;
 };
 
-export default idbStoreObject<Partial<Settings>>({
+export default idbStoreObject<Settings>({
   name: "settings",
   initialValue: {
     theme: "dark"

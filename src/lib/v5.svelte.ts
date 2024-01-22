@@ -6,7 +6,7 @@ interface IDBStoreArrayV5<T> extends IDBStoreArray<T> {
 }
 
 interface IDBStoreObjectV5<T extends Record<string, any>> extends IDBStoreObject<T> {
-  value: Partial<T>;
+  value: T;
 }
 
 export const idbStoreArrayV5 = <T extends Record<string, any>>({name, key, initialValue = [], callback}: OptionsArray<T>): IDBStoreArrayV5<T> => {
@@ -43,11 +43,11 @@ export const idbStoreObjectV5 = <T extends Record<string, any>>({name, initialVa
     callback && callback(creating);
   });
 
-  let s: Partial<T> | undefined = $state(initialValue);
+  let s: T | undefined = $state(initialValue);
 
   return {
-    get value(): Partial<T> {
-      return s || {};
+    get value(): T {
+      return s || ({} as T);
     },
     set value(val: T) {
       idb.set(val).then(res => (s = res));
