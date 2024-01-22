@@ -1,4 +1,4 @@
-import {openDB, type IDBPDatabase} from "idb";
+import {openDB, deleteDB, type IDBPDatabase} from "idb";
 
 abstract class IDB<T, Key> {
   db!: IDBPDatabase;
@@ -8,74 +8,82 @@ abstract class IDB<T, Key> {
   key?: Key;
   initialValue?: T;
 
-  abstract getAll(): Promise<T>;
-  abstract setAll(val: T): Promise<T>;
+  abstract get(): Promise<T>;
+  abstract set(val: T): Promise<T>;
 
   private isBrowser: boolean = typeof window !== "undefined" && "indexedDB" in window;
 
-  constructor(name: string, key?: Key, initialValue?: T, callback?: (val: T) => void) {
-    if (!this.isBrowser) throw new Error("not_browser");
-
+  constructor(name: string, key?: Key, initialValue?: T, callback?: (creating: boolean) => void) {
     this.name = name;
     this.key = key;
     this.initialValue = initialValue;
 
-    this.open().then(val => callback && callback(val));
+    if (!this.isBrowser) return;
+
+    this.open().then(creating => callback && callback(creating));
   }
 
-  open = async (): Promise<T> => {
-    let firstVersion: boolean = false;
+  open = async (): Promise<boolean> => {
+    let creating: boolean = false;
 
     this.db = await openDB(this.name, undefined, {
       upgrade: db => {
         if (!db.objectStoreNames.contains(this.store)) {
-          const store = db.createObjectStore(this.store);
+          const store = db.createObjectStore(this.store, {autoIncrement: true});
 
           if (this.key) {
             store.createIndex(this.index, this.key as string, {unique: true});
           }
 
-          firstVersion = true;
+          creating = true;
         }
       }
     });
 
-    if (this.initialValue && firstVersion) {
-      return await this.setAll(this.initialValue);
+    if (creating && this.initialValue) {
+      await this.set(this.initialValue);
     }
 
-    return await this.getAll();
+    return creating;
   };
 }
 
-export class IDBArray<T extends Record<string, any> = Record<string, any>> extends IDB<T[], Extract<keyof T, string>> {
-  get = (id: string): Promise<T> => this.db.getFromIndex(this.store, this.index, id);
+export class IDBArray<T extends Record<string, any>> extends IDB<T[], Extract<keyof T, string>> {
+  get = (): Promise<T[]> => this.db.getAll(this.store);
 
-  getAll = (): Promise<T[]> => this.db.getAll(this.store);
-
-  remove = (id: string): Promise<void> => this.db.delete(this.store, id);
-
-  removeAll = (): Promise<void> => this.db.clear(this.store);
-
-  set = async (val: T): Promise<void> => {
-    const key = this.key && (await this.db.getKeyFromIndex(this.store, this.index, val[this.key]));
-    await this.db.put(this.store, val, key);
-  };
-
-  setAll = async (val: T[]): Promise<T[]> => {
-    await this.removeAll();
+  set = async (val: T[]): Promise<T[]> => {
+    await this.db.clear(this.store);
     const tx = this.db.transaction(this.store, "readwrite");
-    await Promise.all(val.map((val, i) => tx.store.put(val, i)));
+    await Promise.all(val.map((value, i) => tx.store.put(JSON.parse(JSON.stringify(value)), i)));
     await tx.done;
 
     return val;
   };
+
+  getItem = (id: string): Promise<T> => this.db.getFromIndex(this.store, this.index, id);
+
+  setItem = async (val: T): Promise<T[]> => {
+    const key = this.key && (await this.db.getKeyFromIndex(this.store, this.index, val[this.key]));
+    await this.db.put(this.store, JSON.parse(JSON.stringify(val)), key);
+
+    return this.get();
+  };
+
+  removeItem = async (id: string): Promise<T[]> => {
+    await this.db.delete(this.store, id);
+
+    return this.get();
+  };
+
+  clear = async (): Promise<T[]> => {
+    await this.db.clear(this.store);
+
+    return [];
+  };
 }
 
-export class IDBObject<T extends Record<string, any> = Record<string, any>> extends IDB<T, Extract<keyof T, string>> {
-  get = <K extends Extract<keyof T, string>>(id: K): Promise<T[K]> => this.db.get(this.store, id);
-
-  getAll = async (): Promise<T> => {
+export class IDBObject<T extends Record<string, any>> extends IDB<T, Extract<keyof T, string>> {
+  get = async (): Promise<T> => {
     let res: T = {} as T;
     let cursor = await this.db.transaction(this.store).store.openCursor();
 
@@ -87,19 +95,33 @@ export class IDBObject<T extends Record<string, any> = Record<string, any>> exte
     return res;
   };
 
-  remove = (id: Extract<keyof T, string>): Promise<void> => this.db.delete(this.store, id);
-
-  removeAll = (): Promise<void> => this.db.clear(this.store);
-
-  set = async <K extends Extract<keyof T, string>>(id: K, val: T[K]): Promise<void> => {
-    await this.db.put(this.store, val, id);
-  };
-
-  setAll = async (val: T): Promise<T> => {
+  set = async (val: T): Promise<T> => {
     const tx = this.db.transaction(this.store, "readwrite");
-    await Promise.all(Object.entries(val).map(([key, value]) => tx.store.put(value, key)));
+    await Promise.all(Object.entries(val).map(([key, value]) => tx.store.put(JSON.parse(JSON.stringify(value)), key)));
     await tx.done;
 
     return val;
   };
+
+  getItem = <K extends Extract<keyof T, string>>(id: K): Promise<T[K]> => this.db.get(this.store, id);
+
+  setItem = async <K extends Extract<keyof T, string>>(id: K, val: T[K]): Promise<T> => {
+    await this.db.put(this.store, JSON.parse(JSON.stringify(val)), id);
+
+    return this.get();
+  };
+
+  removeItem = async (id: Extract<keyof T, string>): Promise<T> => {
+    await this.db.delete(this.store, id);
+
+    return this.get();
+  };
+
+  clear = async (): Promise<T> => {
+    await this.db.clear(this.store);
+
+    return {} as T;
+  };
 }
+
+export const remove = deleteDB;

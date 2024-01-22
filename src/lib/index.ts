@@ -1,96 +1,60 @@
 import {writable, type Writable} from "svelte/store";
-import {IDBArray, IDBObject} from "./idb";
+import {IDBArray, IDBObject, remove} from "./idb";
 
-interface IDBStore<T> extends Writable<T> {
-  clear: () => Promise<void>;
-}
+interface IDBStoreArrayV4<T> extends Writable<T[]>, IDBStoreArray<T> {}
 
-export interface IDBStoreArray<T = any> extends IDBStore<T[]> {
-  getOne: (id: string) => Promise<T>;
-  setOne: (val: T) => Promise<void>;
-}
+interface IDBStoreObjectV4<T extends Record<string, any>> extends Writable<T>, IDBStoreObject<T> {}
 
-export interface IDBStoreObject<T extends Record<string, any> = Record<string, any>> extends IDBStore<T> {
-  getOne: <K extends Extract<keyof T, string>>(id: K) => Promise<T[K]>;
-  setOne: <K extends Extract<keyof T, string>>(id: K, val: T[K]) => void;
-}
-
-export const idbStoreArray = <T extends Record<string, any> = Record<string, any>>({
-  name,
-  key,
-  initialValue = []
-}: {
-  name: string;
-  key: Extract<keyof T, string>;
-  initialValue?: T[];
-}): IDBStoreArray<T> => {
+export const idbStoreArray = <T extends Record<string, any>>({name, key, initialValue = [], callback}: OptionsArray<T>): IDBStoreArrayV4<T> => {
   const s = writable<T[]>(initialValue);
-  let idb: IDBArray<T>;
-  try {
-    idb = new IDBArray<T>(name, key, initialValue, val => s.set(val));
-  } catch {}
 
-  const getOne = (id: string): Promise<T> => idb.get(id);
-
-  const set = async (val: T[]): Promise<void> => {
-    await idb.setAll(val);
-    s.set(await idb.getAll());
-  };
-
-  const setOne = async (val: T): Promise<void> => {
-    await idb.set(val);
-    s.set(await idb.getAll());
-  };
-
-  const clear = async (): Promise<void> => {
-    await idb.removeAll();
-    s.set([]);
-  };
+  const idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
+    s.set(await idb.get());
+    callback && callback(creating);
+  });
 
   return {
     ...s,
-    getOne,
-    set,
-    setOne,
-    clear
+    set: async (val: T[]) => {
+      s.set(await idb.set(val));
+    },
+    getItem: idb.getItem,
+    setItem: async (val: T) => {
+      s.set(await idb.setItem(val));
+    },
+    removeItem: async (id: string) => {
+      s.set(await idb.removeItem(id));
+    },
+    clear: async () => {
+      s.set(await idb.clear());
+    }
   };
 };
 
-export const idbStoreObject = <T extends Record<string, any> = Record<string, any>>({
-  name,
-  initialValue
-}: {
-  name: string;
-  initialValue?: T;
-}): IDBStoreObject<T> => {
+export const idbStoreObject = <T extends Record<string, any>>({name, initialValue, callback}: OptionsObject<T>): IDBStoreObjectV4<T> => {
   const s = writable<T>(initialValue);
-  let idb: IDBObject<T>;
-  try {
-    idb = new IDBObject<T>(name, undefined, initialValue, val => s.set(val));
-  } catch {}
 
-  const getOne = <K extends Extract<keyof T, string>>(id: K): Promise<T[K]> => idb.get(id);
-
-  const set = async (val: T): Promise<void> => {
-    await idb.setAll(val);
-    s.set(await idb.getAll());
-  };
-
-  const setOne = async <K extends Extract<keyof T, string>>(id: K, val: T[K]): Promise<void> => {
-    await idb.set(id, val);
-    s.set(await idb.getAll());
-  };
-
-  const clear = async (): Promise<void> => {
-    await idb.removeAll();
-    s.set({} as T);
-  };
+  const idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
+    s.set(await idb.get());
+    callback && callback(creating);
+  });
 
   return {
     ...s,
-    getOne,
-    set,
-    setOne,
-    clear
+    set: async (val: T) => {
+      s.set(await idb.set(val));
+    },
+    getItem: idb.getItem,
+    setItem: async <K extends Extract<keyof T, string>>(id: K, val: T[K]) => {
+      s.set(await idb.setItem(id, val));
+    },
+    removeItem: async <K extends Extract<keyof T, string>>(id: K) => {
+      s.set(await idb.removeItem(id));
+    },
+    clear: async () => {
+      s.set(await idb.clear());
+    }
   };
 };
+
+export const deleteDB = remove;
