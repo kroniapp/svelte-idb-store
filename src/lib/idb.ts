@@ -70,7 +70,10 @@ export class IDBArray<T extends Record<string, any>> extends IDB<T[], Extract<ke
   };
 
   removeItem = async (id: string): Promise<T[]> => {
-    await this.db.delete(this.store, id);
+    const key = this.key && (await this.db.getKeyFromIndex(this.store, this.index, id));
+    if (key !== undefined) {
+      await this.db.delete(this.store, key);
+    }
 
     return this.get();
   };

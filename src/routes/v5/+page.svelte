@@ -17,6 +17,7 @@
 >
   ADD
 </button>
+<button on:click={() => _lists.removeItem("d")}>REMOVE</button>
 <button on:click={() => _lists.clear()}>CLEAR</button>
 
 <button on:click={() => _settings.setItem("theme", "light")}>LIGHT</button>
