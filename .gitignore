@@ -1,4 +1,4 @@
-node_modules
-build
 .svelte-kit
-package
+.vscode
+dist
+node_modules

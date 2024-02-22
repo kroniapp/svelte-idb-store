@@ -1,11 +1,9 @@
-import { sveltekit } from '@sveltejs/kit/vite';
-import type { UserConfig } from 'vite';
+import {sveltekit} from "@sveltejs/kit/vite";
+import type {UserConfig} from "vite";
 
-const config: UserConfig = {
-	server: {
-		port: 3004
-	},
-	plugins: [sveltekit()]
-};
-
-export default config;
+export default {
+  server: {
+    port: 3004
+  },
+  plugins: [sveltekit()]
+} as UserConfig;
