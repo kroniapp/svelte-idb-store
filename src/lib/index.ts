@@ -1,32 +1,73 @@
-import {writable} from "svelte/store";
-import type {Writable} from "svelte/store";
-import IDB from "./idb";
+import {writable, type Writable} from "svelte/store";
+import {exists, IDBArray, IDBObject, remove} from "./idb";
+import type {IDBStoreArray, IDBStoreObject, OptionsArray, OptionsObject} from "./types";
 
-interface IDBStore<T> extends Writable<T> {
-  clear: () => void;
-}
+interface IDBStoreArrayV4<T> extends Writable<T[]>, IDBStoreArray<T> {}
 
-export default <T>(name: string, initialValue?: any): IDBStore<T> => {
-  const store = writable(initialValue);
-  let idb: IDB;
+interface IDBStoreObjectV4<T extends Record<string, any>> extends Writable<T>, IDBStoreObject<T> {}
 
-  idb = new IDB(name);
+export const idbStoreArray = <T extends Record<string, any>>({name, key, initialValue = [], onLoad, onCreate}: OptionsArray<T>): IDBStoreArrayV4<T> => {
+  const s = writable<T[]>(initialValue);
 
-  idb.initialize().then(val => store.set(val));
+  const idb: IDBArray<T> = new IDBArray<T>(name, key, initialValue, async creating => {
+    s.set(await idb.get());
 
-  const set = async (val: any) => {
-    await idb.set(val);
-    store.set(val);
-  };
+    if (creating && onCreate) {
+      onCreate();
+    }
 
-  const clear = async () => {
-    await idb.remove();
-    store.set(initialValue);
-  };
+    onLoad && onLoad();
+  });
 
   return {
-    ...store,
-    set,
-    clear
+    ...s,
+    set: async (val: T[]) => {
+      s.set(await idb.set(val));
+    },
+    getItem: idb.getItem,
+    setItem: async (val: T) => {
+      s.set(await idb.setItem(val));
+    },
+    removeItem: async (id: string) => {
+      s.set(await idb.removeItem(id));
+    },
+    clear: async () => {
+      s.set(await idb.clear());
+    }
   };
 };
+
+export const idbStoreObject = <T extends Record<string, any>>({name, initialValue, onLoad, onCreate}: OptionsObject<T>): IDBStoreObjectV4<T> => {
+  const s = writable<T>(initialValue);
+
+  const idb: IDBObject<T> = new IDBObject<T>(name, undefined, initialValue, async creating => {
+    s.set(await idb.get());
+
+    if (creating && onCreate) {
+      onCreate();
+    }
+
+    onLoad && onLoad();
+  });
+
+  return {
+    ...s,
+    set: async (val: T) => {
+      s.set(await idb.set(val));
+    },
+    getItem: idb.getItem,
+    setItem: async <K extends Extract<keyof T, string>>(id: K, val: T[K]) => {
+      s.set(await idb.setItem(id, val));
+    },
+    removeItem: async <K extends Extract<keyof T, string>>(id: K) => {
+      s.set(await idb.removeItem(id));
+    },
+    clear: async () => {
+      s.set(await idb.clear());
+    }
+  };
+};
+
+export const existsDB = exists;
+
+export const deleteDB = remove;
