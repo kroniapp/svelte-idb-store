@@ -1,6 +1,6 @@
 import {openDB, deleteDB, type IDBPDatabase} from "idb";
 
-abstract class IDB<T, Key> {
+abstract class IDB<T, Key extends string> {
   db!: IDBPDatabase;
   name: string;
   store: string = "data";
