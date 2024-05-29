@@ -1,5 +1,5 @@
 import adapterStatic from "@sveltejs/adapter-static";
-import sveltePreprocess from "svelte-preprocess";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
@@ -8,7 +8,7 @@ export default {
 			fallback: "index.html"
 		})
 	},
-	preprocess: sveltePreprocess({
+	preprocess: vitePreprocess({
 		scss: {
 			includePaths: ['src']
 		}

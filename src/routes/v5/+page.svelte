@@ -1,6 +1,6 @@
-<button on:click={() => (_lists.value = people)}>SET</button>
+<button onclick={() => (_lists.value = people)}>SET</button>
 <button
-  on:click={() =>
+  onclick={() =>
     _lists.setItem({
       _id: "a",
       name: "Test4"
@@ -9,7 +9,7 @@
   UPDATE
 </button>
 <button
-  on:click={() =>
+  onclick={() =>
     _lists.setItem({
       _id: "d",
       name: "Test5"
@@ -17,12 +17,12 @@
 >
   ADD
 </button>
-<button on:click={() => _lists.removeItem("d")}>REMOVE</button>
-<button on:click={() => _lists.clear()}>CLEAR</button>
+<button onclick={() => _lists.removeItem("d")}>REMOVE</button>
+<button onclick={() => _lists.clear()}>CLEAR</button>
 
-<button on:click={() => _settings.setItem("theme", "light")}>LIGHT</button>
-<button on:click={() => _settings.setItem("theme", "dark")}>DARK</button>
-<button on:click={() => _settings.setItem("theme", null)}>AUTO</button>
+<button onclick={() => _settings.setItem("theme", "light")}>LIGHT</button>
+<button onclick={() => _settings.setItem("theme", "dark")}>DARK</button>
+<button onclick={() => _settings.setItem("theme", null)}>AUTO</button>
 
 <h4>LISTS</h4>
 {#if _lists.value}
