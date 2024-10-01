@@ -1,6 +1,6 @@
 {
 	"name": "svelte-idb-store",
-	"version": "0.2.3",
+	"version": "0.2.4",
 	"description": "A library that allows you to sync the value of your Svelte stores with IndexedDB",
 	"keywords": [
 		"svelte",
@@ -13,6 +13,7 @@
 		"name": "Kronia",
 		"email": "kroniapp@gmail.com"
 	},
+	"license": "MIT",
 	"bugs": {
 		"url": "https://github.com/kroniapp/svelte-idb-store/issues",
 		"email": "kroniapp@gmail.com"
