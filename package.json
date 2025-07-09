@@ -22,9 +22,7 @@
 		"type": "git",
 		"url": "https://github.com/kroniapp/svelte-idb-store"
 	},
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
-	"svelte": "./dist/index.js",
+	"main": "./dist/index.svelte.js",
 	"type": "module",
 	"browser": true,
 	"scripts": {
@@ -32,31 +30,33 @@
 		"build": "svelte-package"
 	},
 	"devDependencies": {
-		"@sveltejs/adapter-static": "^3.0.5",
-		"@sveltejs/kit": "^2.6.1",
-		"@sveltejs/package": "^2.3.5",
-		"@sveltejs/vite-plugin-svelte": "4.0.0-next.7",
-		"prettier": "^3.3.3",
-		"prettier-plugin-svelte": "^3.2.7",
-		"svelte": "5.0.0-next.260",
-		"typescript": "^5.6.2",
-		"vite": "5.4.16"
+		"@sveltejs/adapter-static": "^3.0.8",
+		"@sveltejs/kit": "^2.22.2",
+		"@sveltejs/package": "^2.3.12",
+		"@sveltejs/vite-plugin-svelte": "^5.1.0",
+		"prettier": "^3.6.2",
+		"prettier-plugin-svelte": "^3.4.0",
+		"svelte": "^5.35.4",
+		"typescript": "^5.8.3",
+		"vite": "^7.0.3"
 	},
 	"dependencies": {
-		"idb": "^8.0.0"
+		"idb": "^8.0.3"
 	},
 	"files": [
 		"dist"
 	],
 	"exports": {
 		".": {
-			"default": "./dist/index.js",
-			"svelte": "./dist/index.js"
+			"default": "./dist/index.svelte.js"
 		},
-		"./v5": {
-			"types": "./dist/v5.svelte.d.ts",
-			"default": "./dist/v5.svelte.js",
-			"svelte": "./dist/v5.svelte.js"
+		"./array.svelte": {
+			"types": "./dist/array.svelte.d.ts",
+			"default": "./dist/array.svelte.js"
+		},
+		"./object.svelte": {
+			"types": "./dist/object.svelte.d.ts",
+			"default": "./dist/object.svelte.js"
 		}
 	}
 }

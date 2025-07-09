@@ -1,6 +1,8 @@
-<button on:click={() => ($_lists = people)}>SET</button>
+<h2>LISTS</h2>
+
+<button onclick={() => (_lists.value = people)}>SET</button>
 <button
-  on:click={() =>
+  onclick={() =>
     _lists.setItem({
       _id: "a",
       name: "Test4"
@@ -9,7 +11,7 @@
   UPDATE
 </button>
 <button
-  on:click={() =>
+  onclick={() =>
     _lists.setItem({
       _id: "d",
       name: "Test5"
@@ -17,16 +19,11 @@
 >
   ADD
 </button>
-<button on:click={async () => alert(JSON.stringify(await _lists.getItem("a")))}>GET</button>
-<button on:click={() => _lists.clear()}>CLEAR</button>
+<button onclick={() => _lists.removeItem("d")}>REMOVE</button>
+<button onclick={() => _lists.clear()}>CLEAR</button>
 
-<button on:click={() => _settings.setItem("theme", "light")}>LIGHT</button>
-<button on:click={() => _settings.setItem("theme", "dark")}>DARK</button>
-<button on:click={() => _settings.setItem("theme", null)}>AUTO</button>
-
-<h4>LISTS</h4>
-{#if $_lists}
-  {#each $_lists as person}
+{#if _lists.value}
+  {#each _lists.value as person}
     <div>
       {person._id}
       {person.name}
@@ -34,14 +31,21 @@
   {/each}
 {/if}
 
-<h4>SETTINGS</h4>
+<h2>SETTINGS</h2>
+
+<button onclick={() => (_settings.value = settings)}>SET</button>
+<button onclick={() => _settings.setItem("theme", "light")}>LIGHT</button>
+<button onclick={() => _settings.setItem("theme", "dark")}>DARK</button>
+<button onclick={() => _settings.setItem("theme", null)}>AUTO</button>
+<button onclick={() => _settings.clear()}>CLEAR</button>
+
 <pre>
-  {JSON.stringify($_settings)}
+  {JSON.stringify(_settings.value, null, 2)}
 </pre>
 
 <script lang="ts">
   import _lists, {type Person} from "./lists";
-  import _settings from "./settings";
+  import _settings, {type Settings} from "./settings";
 
   const people: Person[] = [
     {
@@ -57,4 +61,9 @@
       name: "Test2"
     }
   ];
+
+  const settings: Settings = {
+    theme: "dark",
+    animations: true
+  };
 </script>
