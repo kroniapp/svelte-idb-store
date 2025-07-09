@@ -1,4 +1,4 @@
-import {idbStoreArray} from "$lib";
+import idbStoreArray from "$lib/array.svelte";
 
 export type Person = {
   _id: string;
