@@ -11,6 +11,7 @@ interface IDBStoreArray<T extends Record<string, any>> {
 interface OptionsArray<T> {
   name: string;
   key: Extract<keyof T, string>;
+  version?: number;
   initialValue?: T[];
   onLoad?: () => void;
   onCreate?: () => void;
@@ -51,10 +52,10 @@ export class IDBArray<T extends Record<string, any>> extends IDB<T[], Extract<ke
   };
 }
 
-export default <T extends Record<string, any>>({name, key, initialValue = [], onLoad, onCreate}: OptionsArray<T>): IDBStoreArray<T> => {
+export default <T extends Record<string, any>>({name, key, version, initialValue = [], onLoad, onCreate}: OptionsArray<T>): IDBStoreArray<T> => {
   let s: T[] = $state(initialValue);
 
-  const idb = new IDBArray<T>(name, key, initialValue, async creating => {
+  const idb = new IDBArray<T>(name, key, version, initialValue, async creating => {
     s = await idb.get();
 
     creating && onCreate?.();
