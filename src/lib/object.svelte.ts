@@ -10,6 +10,7 @@ interface IDBStoreObject<T extends Record<string, any>> {
 
 interface OptionsObject<T> {
   name: string;
+  version?: number;
   initialValue?: T;
   onLoad?: () => void;
   onCreate?: () => void;
@@ -55,10 +56,10 @@ export class IDBObject<T extends Record<string, any>> extends IDB<T, Extract<key
   };
 }
 
-export default <T extends Record<string, any>>({name, initialValue, onLoad, onCreate}: OptionsObject<T>): IDBStoreObject<T> => {
+export default <T extends Record<string, any>>({name, version, initialValue, onLoad, onCreate}: OptionsObject<T>): IDBStoreObject<T> => {
   let s: T | undefined = $state(initialValue);
 
-  const idb = new IDBObject<T>(name, undefined, initialValue, async creating => {
+  const idb = new IDBObject<T>(name, undefined, version, initialValue, async creating => {
     s = await idb.get();
 
     creating && onCreate?.();

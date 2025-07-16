@@ -1,13 +1,13 @@
 import {openDB, type IDBPDatabase} from "idb";
 
 const storeName = "data";
-const indexName = "id";
 
 export default abstract class<T, Key extends string> {
   db!: IDBPDatabase;
 
   name?: string;
   key?: Key;
+  version?: number;
   initialValue?: T;
   callback?: (creating: boolean) => void;
 
@@ -16,21 +16,17 @@ export default abstract class<T, Key extends string> {
 
   private isBrowser: boolean = typeof window !== "undefined" && "indexedDB" in window;
 
-  constructor(name: string, key?: Key, initialValue?: T, callback?: (creating: boolean) => void) {
+  constructor(name: string, key?: Key, version?: number, initialValue?: T, callback?: (creating: boolean) => void) {
     if (!this.isBrowser) return;
 
     this.name = name;
     this.key = key;
+    this.version = version;
     this.initialValue = initialValue;
     this.callback = callback;
 
     this.Initialize();
   }
-
-  Initialize = async () => {
-    const creating = await this.open(this.name!, this.initialValue);
-    this.callback?.(creating);
-  };
 
   store = async () => {
     if (!this.db) await this.Initialize();
@@ -38,28 +34,30 @@ export default abstract class<T, Key extends string> {
     return this.db.transaction(storeName, "readwrite").objectStore(storeName);
   };
 
-  index = async () => (await this.store()).index(indexName);
+  index = async () => (await this.store()).index(this.key || "");
 
-  private open = async (name: string, initialValue?: T): Promise<boolean> => {
+  private Initialize = async (): Promise<boolean> => {
     let creating: boolean = false;
 
-    this.db = await openDB(name, undefined, {
-      upgrade: db => {
+    this.db = await openDB(this.name!, this.version, {
+      upgrade: async (db, _, __, transaction) => {
         if (!db.objectStoreNames.contains(storeName)) {
-          const store = db.createObjectStore(storeName, {autoIncrement: true});
-
-          if (this.key) {
-            store.createIndex(indexName, this.key as string, {unique: true});
-          }
-
+          db.createObjectStore(storeName, {autoIncrement: true});
           creating = true;
+        }
+
+        if (this.key) {
+          Array.from(transaction.objectStore(storeName).indexNames).forEach(index => transaction.objectStore(storeName).deleteIndex(index));
+          transaction.objectStore(storeName).createIndex(this.key, this.key, {unique: true});
         }
       }
     });
 
-    if (creating && initialValue) {
-      await this.set(initialValue);
+    if (creating && this.initialValue) {
+      await this.set(this.initialValue);
     }
+
+    this.callback?.(creating);
 
     return creating;
   };
